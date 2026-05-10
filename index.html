@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Roblox Paste | Discover</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+
+    <!-- AUTHENTICATION SCREEN -->
+    <div id="auth-section" class="screen">
+        <div class="auth-card">
+            <div class="roblox-logo"></div>
+            <h2 id="auth-title">Create Account</h2>
+            
+            <div class="input-group">
+                <label>Username</label>
+                <input type="text" id="username" placeholder="3-16 characters" maxlength="16">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="Password">
+            </div>
+
+            <div class="gender-container" id="gender-box">
+                <button class="gender-btn" onclick="setGender('male')">Male</button>
+                <button class="gender-btn" onclick="setGender('female')">Female</button>
+            </div>
+
+            <button class="btn-primary" id="auth-btn" onclick="handleAuth()">Sign Up</button>
+            <p class="toggle-text" onclick="toggleAuthMode()">Already have an account? Log In</p>
+        </div>
+    </div>
+
+    <!-- MAIN APP SCREEN -->
+    <div id="app-section" class="screen hidden">
+        <nav class="navbar">
+            <div class="nav-left">
+                <span class="logo">ROBLOX<span>PASTE</span></span>
+            </div>
+            <div class="nav-right">
+                <div class="plus-container">
+                    <button class="icon-btn" onclick="togglePlusMenu()">+</button>
+                    <div id="plus-menu" class="dropdown hidden">
+                        <button onclick="openPasteModal()">New Paste</button>
+                        <button onclick="openFolderModal()">New Folder</button>
+                    </div>
+                </div>
+                <button class="btn-secondary" onclick="logout()">Logout</button>
+            </div>
+        </nav>
+
+        <div class="main-layout">
+            <aside class="sidebar">
+                <h3>My Folders</h3>
+                <div id="folder-list" class="scroll-frame">
+                    <!-- Folders appear here -->
+                </div>
+            </aside>
+            
+            <section class="content-area">
+                <div class="header-row">
+                    <h2>Recent Pastes</h2>
+                </div>
+                <div id="paste-container" class="paste-grid">
+                    <!-- Pastes appear here -->
+                </div>
+            </section>
+        </div>
+    </div>
+
+    <!-- MODAL FOR CREATING PASTE -->
+    <div id="paste-modal" class="modal-overlay hidden">
+        <div class="modal-content">
+            <h3>Create New Paste</h3>
+            <input type="text" id="paste-title" placeholder="Paste Title">
+            <textarea id="paste-body" placeholder="Paste your code or text here..."></textarea>
+            <div class="row">
+                <select id="paste-visibility">
+                    <option value="public">Public</option>
+                    <option value="private">Private (Link Only)</option>
+                </select>
+                <select id="target-folder-select">
+                    <!-- Folders load here -->
+                </select>
+            </div>
+            <div class="modal-btns">
+                <button onclick="closeModals()">Cancel</button>
+                <button class="btn-primary" onclick="savePaste()">Create</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
