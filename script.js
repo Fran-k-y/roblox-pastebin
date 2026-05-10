@@ -1,99 +1,107 @@
-let isLoginMode = false;
-let selectedGender = '';
-let currentUser = JSON.parse(localStorage.getItem('session')) || null;
+let isLoginMode = true;
+let selectedGender = 'male';
+let currentUser = JSON.parse(localStorage.getItem('rbx_session')) || null;
 
-// On Page Load
 window.onload = () => {
-    if (currentUser) {
-        showApp();
-    }
+    if (currentUser) showApp();
 };
 
 function toggleAuthMode() {
     isLoginMode = !isLoginMode;
-    document.getElementById('auth-title').innerText = isLoginMode ? "Login" : "Create Account";
-    document.getElementById('auth-btn').innerText = isLoginMode ? "Login" : "Sign Up";
-    document.getElementById('gender-box').classList.toggle('hidden', isLoginMode);
+    document.getElementById('auth-title').innerText = isLoginMode ? "Login to RobloxPaste" : "Create Account";
+    document.getElementById('auth-btn').innerText = isLoginMode ? "Log In" : "Sign Up";
+    document.getElementById('signup-extras').classList.toggle('hidden', isLoginMode);
+}
+
+function selectGender(g) {
+    selectedGender = g;
+    document.querySelectorAll('.gender-btn').forEach(b => b.classList.remove('active'));
+    document.querySelector(`[data-gender="${g}"]`).classList.add('active');
 }
 
 function handleAuth() {
     const user = document.getElementById('username').value.trim();
     const pass = document.getElementById('password').value;
 
-    if (user.length < 3 || user.length > 16) {
-        alert("Username must be 3-16 characters!");
-        return;
-    }
-
-    if (isLoginMode) {
-        const storedUser = JSON.parse(localStorage.getItem(`user_${user}`));
-        if (storedUser && storedUser.pass === pass) {
-            login(storedUser);
-        } else {
-            alert("Invalid credentials!");
-        }
+    if (!isLoginMode) {
+        if (user.length < 3 || user.length > 16) return alert("Username: 3-16 chars!");
+        if (localStorage.getItem(`rbx_u_${user}`)) return alert("Taken!");
+        
+        const userData = { user, pass, gender: selectedGender, folders: ['Default'], pastes: [] };
+        localStorage.setItem(`rbx_u_${user}`, JSON.stringify(userData));
+        login(userData);
     } else {
-        if (localStorage.getItem(`user_${user}`)) {
-            alert("Username already taken!");
-            return;
-        }
-        const newUser = { user, pass, gender: selectedGender, pastes: [], folders: ['Default'] };
-        localStorage.setItem(`user_${user}`, JSON.stringify(newUser));
-        login(newUser);
+        const stored = JSON.parse(localStorage.getItem(`rbx_u_${user}`));
+        if (stored && stored.pass === pass) login(stored);
+        else alert("Wrong credentials!");
     }
 }
 
-function login(userObj) {
-    localStorage.setItem('session', JSON.stringify(userObj));
-    currentUser = userObj;
+function login(data) {
+    localStorage.setItem('rbx_session', JSON.stringify(data));
+    currentUser = data;
     showApp();
 }
 
 function showApp() {
     document.getElementById('auth-section').classList.add('hidden');
     document.getElementById('app-section').classList.remove('hidden');
-    renderSidebar();
+    renderAll();
 }
 
-function togglePlusMenu() {
-    document.getElementById('plus-menu').classList.toggle('hidden');
-}
-
-function openFolderModal() {
-    const folderName = prompt("Enter folder name:");
-    if (folderName) {
-        currentUser.folders.push(folderName);
-        updateStorage();
-        renderSidebar();
-    }
-}
-
-function renderSidebar() {
-    const list = document.getElementById('folder-list');
-    list.innerHTML = currentUser.folders.map(f => `<div class="folder-item">📁 ${f}</div>`).join('');
+function renderAll() {
+    // Folders
+    const fList = document.getElementById('folder-list');
+    fList.innerHTML = currentUser.folders.map(f => `<div class="folder-item"><i class="fas fa-folder"></i> ${f}</div>`).join('');
     
-    // Update the dropdown in the Paste Modal
-    const select = document.getElementById('target-folder-select');
-    select.innerHTML = currentUser.folders.map(f => `<option value="${f}">${f}</option>`).join('');
+    // Folder Select in Modal
+    document.getElementById('paste-folder-select').innerHTML = currentUser.folders.map(f => `<option>${f}</option>`).join('');
+
+    // Pastes
+    const pGrid = document.getElementById('paste-grid');
+    pGrid.innerHTML = currentUser.pastes.map((p, idx) => `
+        <div class="paste-card">
+            <h4>${p.title}</h4>
+            <small>${p.folder} | ${p.privacy}</small>
+            <div class="paste-actions">
+                <button class="btn-mini" onclick="copyPaste(${idx})">Copy</button>
+                <button class="btn-mini" onclick="viewRaw(${idx})">Raw</button>
+            </div>
+        </div>
+    `).join('');
 }
 
-function updateStorage() {
-    localStorage.setItem(`user_${currentUser.user}`, JSON.stringify(currentUser));
-    localStorage.setItem('session', JSON.stringify(currentUser));
+function savePaste() {
+    const title = document.getElementById('paste-name').value;
+    const content = document.getElementById('paste-content').value;
+    const folder = document.getElementById('paste-folder-select').value;
+    const privacy = document.getElementById('paste-privacy').value;
+
+    if(!title || !content) return alert("Fill everything!");
+
+    currentUser.pastes.push({ title, content, folder, privacy });
+    sync();
+    closeModals();
+    renderAll();
 }
 
-function logout() {
-    localStorage.removeItem('session');
-    location.reload();
+function sync() {
+    localStorage.setItem(`rbx_u_${currentUser.user}`, JSON.stringify(currentUser));
+    localStorage.setItem('rbx_session', JSON.stringify(currentUser));
 }
 
-// Logic for Copy/Raw
-function copyToClipboard(text) {
-    navigator.clipboard.writeText(text);
-    alert("Copied!");
+function togglePlusMenu() { document.getElementById('plus-dropdown').classList.toggle('hidden'); }
+function openPasteModal() { document.getElementById('modal-overlay').classList.remove('hidden'); togglePlusMenu(); }
+function closeModals() { document.getElementById('modal-overlay').classList.add('hidden'); }
+function toggleSidebar() { document.getElementById('sidebar').classList.toggle('active'); }
+function logout() { localStorage.removeItem('rbx_session'); location.reload(); }
+
+function copyPaste(idx) {
+    navigator.clipboard.writeText(currentUser.pastes[idx].content);
+    alert("Copied to clipboard!");
 }
 
-function openRaw(text) {
+function viewRaw(idx) {
     const win = window.open("", "_blank");
-    win.document.write(`<pre>${text}</pre>`);
-  }
+    win.document.write(`<pre style="color:white; background:#111; height:100vh; margin:0; padding:20px;">${currentUser.pastes[idx].content}</pre>`);
+}
