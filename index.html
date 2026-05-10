@@ -2,90 +2,90 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Roblox Paste | Discover</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>RobloxPaste | Powering Imagination</title>
     <link rel="stylesheet" href="style.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
 </head>
 <body>
 
-    <!-- AUTHENTICATION SCREEN -->
-    <div id="auth-section" class="screen">
+    <div id="auth-section" class="screen flex-center">
         <div class="auth-card">
-            <div class="roblox-logo"></div>
-            <h2 id="auth-title">Create Account</h2>
-            
-            <div class="input-group">
-                <label>Username</label>
-                <input type="text" id="username" placeholder="3-16 characters" maxlength="16">
-                <label>Password</label>
+            <div class="rbx-logo-square"></div>
+            <h2 id="auth-title">Login to RobloxPaste</h2>
+            <div class="auth-form">
+                <input type="text" id="username" placeholder="Username" autocomplete="off">
                 <input type="password" id="password" placeholder="Password">
-            </div>
+                
+                <div id="signup-extras" class="hidden">
+                    <div class="gender-row">
+                        <button class="gender-btn" data-gender="male" onclick="selectGender('male')"><i class="fas fa-mars"></i></button>
+                        <button class="gender-btn" data-gender="female" onclick="selectGender('female')"><i class="fas fa-venus"></i></button>
+                    </div>
+                </div>
 
-            <div class="gender-container" id="gender-box">
-                <button class="gender-btn" onclick="setGender('male')">Male</button>
-                <button class="gender-btn" onclick="setGender('female')">Female</button>
+                <button class="btn-primary" id="auth-btn" onclick="handleAuth()">Log In</button>
+                <p class="toggle-link" onclick="toggleAuthMode()">Don't have an account? Sign Up</p>
             </div>
-
-            <button class="btn-primary" id="auth-btn" onclick="handleAuth()">Sign Up</button>
-            <p class="toggle-text" onclick="toggleAuthMode()">Already have an account? Log In</p>
         </div>
     </div>
 
-    <!-- MAIN APP SCREEN -->
     <div id="app-section" class="screen hidden">
-        <nav class="navbar">
-            <div class="nav-left">
-                <span class="logo">ROBLOX<span>PASTE</span></span>
-            </div>
-            <div class="nav-right">
-                <div class="plus-container">
-                    <button class="icon-btn" onclick="togglePlusMenu()">+</button>
-                    <div id="plus-menu" class="dropdown hidden">
-                        <button onclick="openPasteModal()">New Paste</button>
-                        <button onclick="openFolderModal()">New Folder</button>
-                    </div>
+        <nav class="rbx-nav">
+            <div class="nav-content">
+                <div class="nav-left">
+                    <div class="menu-icon pc-hide" onclick="toggleSidebar()"><i class="fas fa-bars"></i></div>
+                    <span class="brand">ROBLOX<span class="brand-sub">PASTE</span></span>
                 </div>
-                <button class="btn-secondary" onclick="logout()">Logout</button>
+                <div class="nav-right">
+                    <div class="plus-wrapper">
+                        <button class="nav-plus" onclick="togglePlusMenu()"><i class="fas fa-plus"></i></button>
+                        <div id="plus-dropdown" class="rbx-dropdown hidden">
+                            <div class="drop-item" onclick="openPasteModal()"><i class="fas fa-file-code"></i> New Paste</div>
+                            <div class="drop-item" onclick="openFolderModal()"><i class="fas fa-folder-plus"></i> New Folder</div>
+                        </div>
+                    </div>
+                    <button class="nav-logout" onclick="logout()"><i class="fas fa-sign-out-alt"></i></button>
+                </div>
             </div>
         </nav>
 
-        <div class="main-layout">
-            <aside class="sidebar">
-                <h3>My Folders</h3>
-                <div id="folder-list" class="scroll-frame">
-                    <!-- Folders appear here -->
-                </div>
+        <div class="app-body">
+            <aside id="sidebar" class="rbx-sidebar">
+                <div class="sidebar-header">MY FOLDERS</div>
+                <div id="folder-list" class="folder-scroll">
+                    </div>
             </aside>
-            
-            <section class="content-area">
-                <div class="header-row">
-                    <h2>Recent Pastes</h2>
-                </div>
-                <div id="paste-container" class="paste-grid">
-                    <!-- Pastes appear here -->
-                </div>
-            </section>
+
+            <main class="rbx-main">
+                <header class="main-header">
+                    <h1 id="view-title">Recent Pastes</h1>
+                    <div class="search-bar">
+                        <i class="fas fa-search"></i>
+                        <input type="text" placeholder="Search pastes...">
+                    </div>
+                </header>
+                <div id="paste-grid" class="paste-grid">
+                    </div>
+            </main>
         </div>
     </div>
 
-    <!-- MODAL FOR CREATING PASTE -->
-    <div id="paste-modal" class="modal-overlay hidden">
-        <div class="modal-content">
-            <h3>Create New Paste</h3>
-            <input type="text" id="paste-title" placeholder="Paste Title">
-            <textarea id="paste-body" placeholder="Paste your code or text here..."></textarea>
-            <div class="row">
-                <select id="paste-visibility">
+    <div id="modal-overlay" class="modal-overlay hidden" onclick="closeModals(event)">
+        <div class="rbx-modal" onclick="event.stopPropagation()">
+            <h3 id="modal-title">Create New Paste</h3>
+            <input type="text" id="paste-name" placeholder="Title">
+            <textarea id="paste-content" placeholder="Paste content here..."></textarea>
+            <div class="modal-row">
+                <select id="paste-folder-select"></select>
+                <select id="paste-privacy">
                     <option value="public">Public</option>
-                    <option value="private">Private (Link Only)</option>
-                </select>
-                <select id="target-folder-select">
-                    <!-- Folders load here -->
+                    <option value="private">Private</option>
                 </select>
             </div>
-            <div class="modal-btns">
-                <button onclick="closeModals()">Cancel</button>
-                <button class="btn-primary" onclick="savePaste()">Create</button>
+            <div class="modal-footer">
+                <button class="btn-sec" onclick="closeModals()">Cancel</button>
+                <button class="btn-primary" onclick="savePaste()">Save Paste</button>
             </div>
         </div>
     </div>
